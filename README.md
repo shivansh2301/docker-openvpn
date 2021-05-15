@@ -19,32 +19,41 @@ a corresponding [Digital Ocean Community Tutorial](http://bit.ly/1AGUZkq).
 
 ## Quick Start
 
+kylemanna/openvpn:edge - is currently on openvpn server 2.5 -  which ONLY allows AES-256-GCM AES-128-GCM
+kylemanna/openvpn - is currently on openvpn server 2.4 - which is not easily compatible with openvpn client 2.5 (current distribution)
+
+* Forward port 1914 on your WiFi router to your local machine.
+
+* Obtain PUBLIC_IP - from whatsmyip
+
 * Pick a name for the `$OVPN_DATA` data volume container. It's recommended to
   use the `ovpn-data-` prefix to operate seamlessly with the reference systemd
   service.  Users are encourage to replace `example` with a descriptive name of
   their choosing.
 
       OVPN_DATA="ovpn-data-example"
+      PUBLIC_IP="x.x.x.x"
+      CLIENTNAME="deviceABC"
 
 * Initialize the `$OVPN_DATA` container that will hold the configuration files
   and certificates.  The container will prompt for a passphrase to protect the
   private key used by the newly generated certificate authority.
 
       docker volume create --name $OVPN_DATA
-      docker run -v $OVPN_DATA:/etc/openvpn --rm kylemanna/openvpn ovpn_genconfig -u udp://VPN.SERVERNAME.COM
-      docker run -v $OVPN_DATA:/etc/openvpn --rm -it kylemanna/openvpn ovpn_initpki
+      docker run -v $OVPN_DATA:/etc/openvpn --rm kylemanna/openvpn:edge ovpn_genconfig -u udp://$PUBLIC_IP
+      docker run -v $OVPN_DATA:/etc/openvpn --rm -it kylemanna/openvpn:edge ovpn_initpki
 
 * Start OpenVPN server process
 
-      docker run -v $OVPN_DATA:/etc/openvpn -d -p 1194:1194/udp --cap-add=NET_ADMIN kylemanna/openvpn
+      docker run -v $OVPN_DATA:/etc/openvpn -d -p 1194:1194/udp --cap-add=NET_ADMIN kylemanna/openvpn:edge
 
-* Generate a client certificate without a passphrase
+* Generate a client certificate without a passphrase 
 
-      docker run -v $OVPN_DATA:/etc/openvpn --rm -it kylemanna/openvpn easyrsa build-client-full CLIENTNAME nopass
+      docker run -v $OVPN_DATA:/etc/openvpn --rm -it kylemanna/openvpn:edge easyrsa build-client-full $CLIENTNAME nopass
 
 * Retrieve the client configuration with embedded certificates
 
-      docker run -v $OVPN_DATA:/etc/openvpn --rm kylemanna/openvpn ovpn_getclient CLIENTNAME > CLIENTNAME.ovpn
+      docker run -v $OVPN_DATA:/etc/openvpn --rm kylemanna/openvpn:edge ovpn_getclient $CLIENTNAME > $CLIENTNAME.ovpn
 
 ## Next Steps
 
