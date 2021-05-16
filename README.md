@@ -6,17 +6,6 @@
 [![ImageLayers](https://images.microbadger.com/badges/image/kylemanna/openvpn.svg)](https://microbadger.com/#/images/kylemanna/openvpn)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fkylemanna%2Fdocker-openvpn.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fkylemanna%2Fdocker-openvpn?ref=badge_shield)
 
-
-OpenVPN server in a Docker container complete with an EasyRSA PKI CA.
-
-Extensively tested on [Digital Ocean $5/mo node](http://bit.ly/1C7cKr3) and has
-a corresponding [Digital Ocean Community Tutorial](http://bit.ly/1AGUZkq).
-
-#### Upstream Links
-
-* Docker Registry @ [kylemanna/openvpn](https://hub.docker.com/r/kylemanna/openvpn/)
-* GitHub @ [kylemanna/docker-openvpn](https://github.com/kylemanna/docker-openvpn)
-
 ## Quick Start
 
 kylemanna/openvpn:edge - is currently on openvpn server 2.5 -  which ONLY allows AES-256-GCM AES-128-GCM
@@ -55,44 +44,13 @@ kylemanna/openvpn - is currently on openvpn server 2.4 - which is not easily com
 
       docker run -v $OVPN_DATA:/etc/openvpn --rm kylemanna/openvpn:edge ovpn_getclient $CLIENTNAME > $CLIENTNAME.ovpn
 
-## Next Steps
+## Revoke a client
 
-### More Reading
+* To revoke a client's access to the vpn server
 
-Miscellaneous write-ups for advanced configurations are available in the
-[docs](docs) folder.
+      docker exec -it OPENVPN-CONTAINER easyrsa revoke MY-USER-CommonName
+      docker exec -it OPENVPN-CONTAINER easyrsa gen-crl    
 
-### Systemd Init Scripts
-
-A `systemd` init script is available to manage the OpenVPN container.  It will
-start the container on system boot, restart the container if it exits
-unexpectedly, and pull updates from Docker Hub to keep itself up to date.
-
-Please refer to the [systemd documentation](docs/systemd.md) to learn more.
-
-### Docker Compose
-
-If you prefer to use `docker-compose` please refer to the [documentation](docs/docker-compose.md).
-
-## Debugging Tips
-
-* Create an environment variable with the name DEBUG and value of 1 to enable debug output (using "docker -e").
-
-        docker run -v $OVPN_DATA:/etc/openvpn -p 1194:1194/udp --cap-add=NET_ADMIN -e DEBUG=1 kylemanna/openvpn
-
-* Test using a client that has openvpn installed correctly
-
-        $ openvpn --config CLIENTNAME.ovpn
-
-* Run through a barrage of debugging checks on the client if things don't just work
-
-        $ ping 8.8.8.8    # checks connectivity without touching name resolution
-        $ dig google.com  # won't use the search directives in resolv.conf
-        $ nslookup google.com # will use search
-
-* Consider setting up a [systemd service](/docs/systemd.md) for automatic
-  start-up at boot time and restart in the event the OpenVPN daemon or Docker
-  crashes.
 
 ## How Does It Work?
 
